@@ -3,6 +3,7 @@ ofxLaser
 ofxNetwork
 ofxOpenCv
 ofxPoco
-ofxSvg
+ofxSVG
+ofxSvg2
 ofxTablet
 ofxXmlSettings

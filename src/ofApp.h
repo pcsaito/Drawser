@@ -3,8 +3,9 @@
 #include "ofMain.h"
 #include "ofxLaserManager.h"
 #include "ofxLaserDacEtherdream.h"
+#include "ofxLaserGraphic.h"
 #include "ofxGui.h"
-#include "ofxTablet.h"
+#include "ofxSvg.h"
 
 class ofApp : public ofBaseApp{
 	
@@ -16,7 +17,6 @@ public:
 	
     void keyReleased(int key);
 	void keyPressed  (int key);
-    void tabletMoved(TabletData &data);
     void mouseMoved(int x, int y);
 	void mouseDragged(int x, int y, int button);
 	void mousePressed(int x, int y, int button);
@@ -25,11 +25,14 @@ public:
     void drawStarted();
     void drawStoped();
     void drawDragged(int x, int y);
-
+    void pickerMoved(int x, int y);
+    
+    void saveSVG();
+    void loadSVGs();
 	
 	void showLaserEffect(int effectnum);
 	
-	ofParameter<int> currentLaserEffect;
+	ofParameter<int> currentSVG;
 	int numLaserEffects; 
 	
 	ofxLaser::Manager laser;
@@ -46,8 +49,11 @@ public:
     ofImage colorPicker;
     bool colorPicking;
 
-	std::vector<tuple<ofPolyline,ofColor>> polyLines;
-		
+	vector<tuple<ofPolyline,ofColor>> polyLines;
+    
+    vector<ofxLaser::Graphic> laserGraphics;
+    vector<string> fileNames;
+
 	float elapsedTime; 
 
     ofxPanel cgui;

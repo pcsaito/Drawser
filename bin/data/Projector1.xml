@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Projector1>
 	<ARMED>1</ARMED>
-	<Intensity>0.963636</Intensity>
+	<Intensity>1</Intensity>
 	<Test_Pattern>0</Test_Pattern>
 	<Projector_settings>
 		<Points_per_second>24600</Points_per_second>
