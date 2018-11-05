@@ -29,11 +29,14 @@ public:
     
     void saveSVG();
     void loadSVGs();
+    
+    void loadColorMasks();
 	
-	void showLaserEffect(int effectnum);
+	void drawLaser(int svgNum);
 	
-	ofParameter<int> currentSVG;
-	int numLaserEffects; 
+    ofParameter<int> currentSVG;
+
+    ofParameter<int> currentLaserEffect;
 	
 	ofxLaser::Manager laser;
     ofxLaser::DacEtherdream dac;
@@ -58,5 +61,10 @@ public:
 
     ofxPanel cgui;
     ofParameter<ofColor> color;
+    
+    ofImage colorMask;
+    vector<string> colorMaskNames;
+    ofParameter<int> currentColorMask;
+    ofColor getMaskedColor(int x, int y);
 };
 

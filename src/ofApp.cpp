@@ -2,6 +2,9 @@
 #include "ofxPolylinesToSVG.h"
 #include <time.h>
 
+#include <ctime>
+
+
 //--------------------------------------------------------------
 void ofApp::setup(){
     ofSetEscapeQuitsApp(false);
@@ -28,13 +31,18 @@ void ofApp::setup(){
 	
     laser.initGui();
     currentSVG = 0;
-    numLaserEffects = 4;
+    
+    currentLaserEffect = -1;
 	 
     cgui.setup("color panel", "colors.xml", ofGetWidth()-240, 700 );
     cgui.add(color.set("color", ofColor(0, 255, 0), ofColor(0), ofColor(255)));
     cgui.getGroup("color").maximize();
     
     colorPicker.load("fullColorPicker.png");
+    
+    currentColorMask = 0;
+    colorMask.load("mandala.png");
+    colorMask.resize(800,800);
 }
 
 //--------------------------------------------------------------
@@ -63,12 +71,13 @@ void ofApp::draw() {
 	
 	int ypos = laserHeight+20;
     ofDrawBitmapString("Current FPS : "+ofToString(laser.getProjectorFrameRate(0)), 400, ypos+=30);
-    if (fileNames.size()>0) ofDrawBitmapString("Current SVG : "+ofToString(currentSVG) + " "+fileNames[currentSVG], 400, ypos+=30);
-    ofDrawBitmapString("TAB to change view, F to toggle full screen", 400, ypos+=30);
-	ofDrawBitmapString("Left and Right Arrows to change current effect", 400, ypos+=30);
-    ofDrawBitmapString("Mouse to draw polylines, 'C' to clear", 400, ypos+=30);
-    
-    showLaserEffect(currentSVG);
+    if (fileNames.size()>0) ofDrawBitmapString("Current SVG: "+ofToString(currentSVG) + " "+fileNames[currentSVG], 400, ypos+=30);
+    if (colorMaskNames.size()>0) ofDrawBitmapString("Current Color Mask: "+colorMaskNames[currentColorMask], 400, ypos+=30);
+	ofDrawBitmapString("Left and Right Arrows to change saved frames", 400, ypos+=30);
+    ofDrawBitmapString("Mouse to draw polylines, 'Z' to undo and 'C' to clear", 400, ypos+=30);
+    ofDrawBitmapString("'P' or right click to pick color, 'S' to save the frame", 400, ypos+=30);
+
+    drawLaser(currentSVG);
 
     // sends points to the DAC
     laser.send();
@@ -79,98 +88,54 @@ void ofApp::draw() {
 }
 
 
-void ofApp :: showLaserEffect(int effectnum) {
-    
-    
-	float left = laserWidth*0.1;
-	float top = laserHeight*0.1;
-	float right = laserWidth*0.9;
-	float bottom = laserHeight*0.9;
-	float width = laserWidth*0.8;
-	float height = laserHeight*0.8;
-	
-//    switch (currentSVG) {
-//        case 1: {
-//
-//            // LASER PARTICLES
-//            int numParticles = 20;
-//
-//            for(int i = 0; i<numParticles; i++) {
-//
-//                float progress =(float)i/(float)(numParticles-1);
-//
-//                float xpos =left + (width*progress) ;
-//
-//                laser.drawDot(ofPoint(xpos, top+height*0.3), ofColor(255));
-//                ofColor c;
-//                c.setHsb(progress*255, 255, 255);
-//                laser.drawDot(ofPoint(xpos, top+height*0.7), c);
-//
-//            }
-//
-//            break;
-//
-//        }
-//        case 2: {
-//
-//            // LASER PARTICLES ANIMATING
-//
-//            float speed = 0.5;
-//            for(int i = 0; i<15; i++) {
-//
-//                ofColor c;
-//                c.setHsb(i*5.5,255,255);
-//                ofPoint p;
-//                float spread = ofMap(cos(elapsedTime*0.4),1,-1,0.01,0.1);
-//                p.x = sin((elapsedTime-((float)i*2*spread)) *1.83f * speed) * 300;
-//                p.y = sin((elapsedTime-((float)i*2*spread)) *2.71f *speed) * 300;
-//                p.x+=laserWidth/2;
-//                p.y+=laserHeight/2;
-//
-//                laser.drawDot(p, c);
-//
-//            }
-//
-//            break;
-//
-//        }
-//
-//        case 3: {
-//
-//            // LASER PARTICLES ANIMATING
-//
-//            float speed = 0.5;
-//            for(int i = 0; i<3; i++) {
-//
-//                ofColor c;
-//                c.setHsb(i*20,255,255);
-//                ofPoint p;
-//                float spread = ofMap(cos(elapsedTime*0.4),1,-1,0.01,0.1);
-//                p.x = sin((elapsedTime-((float)i*2*spread)) *1.83f * speed) * 300;
-//                p.y = sin((elapsedTime-((float)i*2*spread)) *2.71f *speed) * 300;
-//                p.x+=laserWidth/2;
-//                p.y+=laserHeight/2;
-//
-//                laser.drawDot(p, c);
-//
-//            }
-//
-//            break;
-//
-//        }
-//    }
-
+void ofApp::drawLaser(int svgNum) {
     // LASER SVGS
-    ofPushMatrix();
-    ofTranslate(400, 400);
     if(laserGraphics.size()>currentSVG) {
-        laserGraphics[currentSVG].renderToLaser(laser, 1, OFXLASER_PROFILE_DEFAULT);
+        vector<ofColor> colors = laserGraphics[currentSVG].colours;
+        vector<ofPolyline> polys = laserGraphics[currentSVG].polylines;
+        
+        for(size_t i = 0; i<polys.size(); i++) {
+            ofPolyline poly  = polys[i];
+            
+            if (currentColorMask == 0) {
+                ofPushMatrix();
+                ofTranslate(400, 400);
+                
+                laser.drawPoly(poly,colors[i]);
+                ofPopMatrix();
+
+            } else {
+                colors.clear();
+                vector<ofDefaultVertexType> points = poly.getVertices();
+                
+                for(size_t j = 0; j<points.size(); j++) {
+                    ofDefaultVertexType point = points[j];
+                    ofColor pointcolor = getMaskedColor(point.x, point.y);
+                    colors.push_back(pointcolor);
+                }
+                
+                laser.drawPoly(poly, colors);
+            }
+        }
     }
-    ofPopMatrix();
     
 	// LASER POLYLINES
 	for(size_t i = 0; i<polyLines.size(); i++) {
-		laser.drawPoly(get<0>(polyLines[i]), get<1>(polyLines[i]));
+        if (currentColorMask == 0) {
+            laser.drawPoly(get<0>(polyLines[i]), get<1>(polyLines[i]));
+        } else {
+            vector<ofColor> colors;
+            vector<ofDefaultVertexType> points = get<0>(polyLines[i]).getVertices();
+            
+            for(size_t j = 0; j<points.size(); j++) {
+                ofDefaultVertexType point = points[j];
+                ofColor pointcolor = getMaskedColor(point.x, point.y);
+                colors.push_back(pointcolor);
+            }
+            
+            laser.drawPoly(get<0>(polyLines[i]), colors);
+
+        }
 	}
     
     //Cursor
@@ -183,6 +148,141 @@ void ofApp :: showLaserEffect(int effectnum) {
             laser.drawDot(ofPoint(cursorX, cursorY), color);
         }
     }
+    
+    
+    
+    float left = laserWidth*0.1;
+    float top = laserHeight*0.1;
+    float right = laserWidth*0.9;
+    float bottom = laserHeight*0.9;
+    float width = laserWidth*0.8;
+    float height = laserHeight*0.8;
+
+    switch (currentLaserEffect) {
+        case -1: { break; }
+        case 1: {
+            ofPath ellipse = ofPath();
+            ellipse.setFilled(false);
+            ellipse.setStrokeWidth(3);
+            ellipse.setCircleResolution(100);
+            
+            float localTime = elapsedTime;
+            float N = 12;
+            for (int i = 0; i < N; i++) {
+                ellipse.clear();
+                float w = (75+(i*40))*cos((localTime+((float)cursorY/360.0*i)));
+                float h = (75+(i*40))*cos(((float)cursorX/360.0)*i);
+                ellipse.moveTo(0+(w/2),0);
+                ellipse.ellipse(0,0,w,h);
+                //        ellipse.rotateDeg(360.0*sin(elapsedTime), ofPoint(0,0,1));
+                //        ellipse.draw(0,0);
+                
+                ofColor frameColor = ofColor::fromHsb(230.0/N*i, 255, 255);
+                
+                ellipse.translate(ofPoint(400,400,0));
+                vector<ofPolyline> polys = ellipse.getOutline();
+                for(size_t i = 0; i<polys.size(); i++) {
+                    if (currentColorMask == 0) {
+                        laser.drawPoly(polys[i], frameColor);
+                    } else {
+                        vector<ofColor> colors;
+                        vector<ofDefaultVertexType> points = polys[i].getVertices();
+                        
+                        for(size_t j = 0; j<points.size(); j++) {
+                            ofDefaultVertexType point = points[j];
+                            ofColor pointcolor = getMaskedColor(point.x, point.y);
+                            colors.push_back(pointcolor);
+                        }
+                        
+                        laser.drawPoly(polys[i], colors);
+                    }
+                }
+            }
+            break;
+        }
+        case 2: {
+            // LASER PARTICLES ANIMATING
+            
+            float speed = 0.2;
+            for(int i = 0; i<10; i++) {
+                
+                ofPoint p;
+                float spread = ofMap(cos(elapsedTime*0.4),1,-1,0.01,0.1);
+                p.x = sin((elapsedTime-((float)i*spread)) *1.83f * speed) * 300;
+                p.y = sin((elapsedTime-((float)i*spread)) *2.71f *speed) * 300;
+                p.x+=laserWidth/2;
+                p.y+=laserHeight/2;
+                
+                ofColor c;
+                if (currentColorMask == 0) {
+                    c.setHsb(i*10,255,255);
+                } else {
+                    c = getMaskedColor(p.x, p.y);
+                }
+                
+                laser.drawDot(p, c);
+                
+            }
+            
+            break;
+        }
+            
+        case 3: {
+            
+            // LASER LINES ANIMATING
+            int numlines = cursorY / 50;
+            
+            ofPath line = ofPath();
+            line.setFilled(false);
+            line.setStrokeWidth(3);
+            line.setCurveResolution(100);
+            
+            float localTime = elapsedTime;
+            int delta = width/numlines;
+
+            for(int i = 0; i<numlines; i++) {
+                line.clear();
+
+                float progress =(float)i/(float)(numlines);
+                
+                float xpos = elapsedTime*cursorX + i*delta;
+                while (xpos > laserWidth+delta) xpos = xpos - delta*numlines;
+                xpos = xpos - 1.1*delta;
+                
+                line.moveTo(xpos,top);
+                line.curveTo(xpos,top);
+                line.curveTo(xpos,top);
+
+                line.curveTo(xpos,top+height);
+                line.curveTo(xpos,top+height);
+                
+                ofColor frameColor = ofColor::fromHsb(progress*255, 255, 255);
+                
+                vector<ofPolyline> polys = line.getOutline();
+                for(size_t i = 0; i<polys.size(); i++) {
+                    if (currentColorMask == 0) {
+                        laser.drawPoly(polys[i], frameColor);
+                    } else {
+                        vector<ofColor> colors;
+                        vector<ofDefaultVertexType> points = polys[i].getVertices();
+                        
+                        for(size_t j = 0; j<points.size(); j++) {
+                            ofDefaultVertexType point = points[j];
+                            
+                            ofColor pointcolor = getMaskedColor(point.x, point.y);
+                            colors.push_back(pointcolor);
+                        }
+                        
+                        laser.drawPoly(polys[i], colors);
+                    }
+                }
+            }
+            
+            break;
+            
+        }
+    }
+    
 }
 
 
@@ -239,6 +339,68 @@ void ofApp::keyPressed(int key){
         case OF_KEY_RIGHT:
             currentSVG++;
             if(currentSVG>=laserGraphics.size()) currentSVG = 0;
+            break;
+            
+        case '-':
+            loadColorMasks();
+            currentColorMask--;
+            if(currentColorMask<0) currentColorMask = colorMaskNames.size()-1;
+            colorMask.load(colorMaskNames[currentColorMask]);
+            colorMask.resize(laserWidth,laserHeight);
+
+            break;
+            
+        case '=':
+            loadColorMasks();
+            currentColorMask++;
+            if(currentColorMask>=colorMaskNames.size()) currentColorMask = 0;
+            colorMask.load(colorMaskNames[currentColorMask]);
+            colorMask.resize(laserWidth,laserHeight);
+
+            break;
+            
+        case '`':
+            currentLaserEffect = -1;
+            break;
+            
+        case '1':
+            currentLaserEffect = 1;
+            break;
+            
+        case '2':
+            currentLaserEffect = 2;
+            break;
+            
+        case '3':
+            currentLaserEffect = 3;
+            break;
+            
+        case '4':
+            currentLaserEffect = 4;
+            break;
+            
+        case '5':
+            currentLaserEffect = 5;
+            break;
+            
+        case '6':
+            currentLaserEffect = 6;
+            break;
+            
+        case '7':
+            currentLaserEffect = 7;
+            break;
+            
+        case '8':
+            currentLaserEffect = 8;
+            break;
+            
+        case '9':
+            currentLaserEffect = 9;
+            break;
+            
+        case '0':
+            currentLaserEffect = 0;
             break;
             
         case OF_KEY_ESC:
@@ -320,6 +482,15 @@ void ofApp::drawDragged(int x, int y){
 }
 
 void ofApp::saveSVG(){
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+    time (&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer,sizeof(buffer),"%d%m%Y-%H%M%S",timeinfo);
+    string path = string("svgs/") + string(buffer) + string(".svg");
+    ofLog(OF_LOG_NOTICE , "Save path: " + path);
+    
     ofxPolylinesToSVG svg = ofxPolylinesToSVG();
     
     for(size_t i = 0; i<polyLines.size(); i++) {
@@ -329,11 +500,7 @@ void ofApp::saveSVG(){
         svg.addPolyline(poly, color);
     }
     
-    time_t _tm =time(NULL );
-    struct tm * curtime = localtime ( &_tm );
-    string path = string("svgs/") + asctime(curtime) + string(".svg");
     svg.saveToFile(path);
-    
     loadSVGs();
 }
 
@@ -369,6 +536,32 @@ void ofApp::loadSVGs(){
     }
 }
 
+void ofApp::loadColorMasks(){
+    // get the filenames of all the svgs in the data/svgs folder
+    string path = "colorMasks/";
+    ofDirectory dir(path);
+    dir.allowExt("png");
+    dir.listDir();
+    dir.sort();
+    
+    // and load them all
+    const vector<ofFile>& files = dir.getFiles();
+    //laserGraphics.resize(files.size());
+    //fileNames.resize(files.size());
+    
+    colorMaskNames.clear();
+    colorMaskNames.push_back(" ");
+    
+    for(int i = 0; i<files.size();i++) {
+        const ofFile & file = files.at(i);
+        ofLog(OF_LOG_NOTICE,file.path());
+        colorMaskNames.push_back(file.path());
+    }
+}
+
+ofColor ofApp::getMaskedColor(int x, int y) {
+    return colorMask.getColor(ofClamp(x, 0, laserWidth-1), ofClamp(y, 0, laserHeight-1));
+}
 
 
 //--------------------------------------------------------------

@@ -6,16 +6,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "src/ofApp.cpp"
-            timestampString = "562377384.030111"
+            filePath = "../laserpaint/src/ofApp.cpp"
+            timestampString = "562958367.5166219"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "366"
-            endingLineNumber = "366"
-            landmarkName = "ofApp::loadSVGs()"
+            startingLineNumber = "558"
+            endingLineNumber = "558"
+            landmarkName = "ofApp::loadColorMasks()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -25,13 +25,29 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../../addons/ofxLaser/src/ofxLaserGraphic.cpp"
-            timestampString = "562377384.030459"
+            filePath = "../laserpaint/src/ofApp.cpp"
+            timestampString = "562958367.517121"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "631"
-            endingLineNumber = "631"
-            landmarkName = "Graphic :: renderToLaser(ofxLaser::Manager&amp; laser, float brightness, string renderProfile)"
+            startingLineNumber = "252"
+            endingLineNumber = "252"
+            landmarkName = "ofApp::drawLaser(int svgNum)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "../laserpaint/src/ofApp.cpp"
+            timestampString = "562958367.518456"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "246"
+            endingLineNumber = "246"
+            landmarkName = "ofApp::drawLaser(int svgNum)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

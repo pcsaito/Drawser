@@ -212,6 +212,7 @@
 		3A3D7BB221850B9E00117BDA /* ofxPolylinesToSVG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxPolylinesToSVG.h; path = ../../../addons/ofxPolylinesToSVG/src/ofxPolylinesToSVG.h; sourceTree = "<group>"; };
 		3A3D7BB321850B9E00117BDA /* ofxPolylinesToSVG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxPolylinesToSVG.cpp; path = ../../../addons/ofxPolylinesToSVG/src/ofxPolylinesToSVG.cpp; sourceTree = "<group>"; };
 		3A3D7BB421850B9E00117BDA /* ofxSVGXml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxSVGXml.h; path = ../../../addons/ofxPolylinesToSVG/src/ofxSVGXml.h; sourceTree = "<group>"; };
+		3A3D7BBB2187DBC000117BDA /* Xcode.app */ = {isa = PBXFileReference; lastKnownFileType = wrapper.application; name = Xcode.app; path = ../../../../../../../../Applications/Xcode.app; sourceTree = "<group>"; };
 		3A4821C85052A8CED6405046 /* wobble_suppression.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = wobble_suppression.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/videostab/wobble_suppression.hpp; sourceTree = SOURCE_ROOT; };
 		3AAB03AD4F0D4C175C9D7466 /* transpose.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = transpose.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/cudev/grid/detail/transpose.hpp; sourceTree = SOURCE_ROOT; };
 		3AFE5637A5F062F7D47A3BB4 /* highgui.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = highgui.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui.hpp; sourceTree = SOURCE_ROOT; };
@@ -960,6 +961,14 @@
 				1054B4574F75C1F693C147C6 /* optical_flow.hpp */,
 			);
 			name = videostab;
+			sourceTree = "<group>";
+		};
+		3A3D7BBA2187DBC000117BDA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3A3D7BBB2187DBC000117BDA /* Xcode.app */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		3B6719C4EA0735EC4E269550 /* runtime */ = {
@@ -1760,6 +1769,7 @@
 				BB4B014C10F69532006C3DED /* addons */,
 				6948EE371B920CB800B5AC1A /* local_addons */,
 				E4B69B5B0A3A1756003C02F2 /* LaserPaintDebug.app */,
+				3A3D7BBA2187DBC000117BDA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
